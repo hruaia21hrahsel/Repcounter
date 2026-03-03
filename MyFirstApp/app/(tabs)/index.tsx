@@ -188,9 +188,10 @@ const styles = StyleSheet.create({
     backgroundColor: GymColors.background,
   },
   scroll: {
-    padding: Spacing.md,
-    gap: Spacing.md,
+    paddingHorizontal: Spacing.md,
+    paddingTop: Spacing.sm,
     paddingBottom: Spacing.xxl,
+    gap: Spacing.md,
   },
   header: {
     flexDirection: 'row',

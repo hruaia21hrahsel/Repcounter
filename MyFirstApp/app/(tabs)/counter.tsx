@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    marginTop: Spacing.lg,
+    marginTop: Spacing.sm,
     gap: Spacing.xs,
   },
   title: {

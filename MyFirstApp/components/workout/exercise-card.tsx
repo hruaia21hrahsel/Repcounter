@@ -10,7 +10,7 @@ interface ExerciseCardProps {
   exercise: ActiveExercise;
   weightUnit: string;
   onUpdateSet: (setNumber: number, data: Partial<ActiveSet>) => void;
-  onCompleteSet: (set: ActiveSet) => void;
+  onStartSet: (set: ActiveSet) => void;
   onDeleteSet: (setNumber: number) => void;
   onAddSet: () => void;
   onRemove: () => void;
@@ -20,7 +20,7 @@ export function ExerciseCard({
   exercise,
   weightUnit,
   onUpdateSet,
-  onCompleteSet,
+  onStartSet,
   onDeleteSet,
   onAddSet,
   onRemove,
@@ -36,7 +36,7 @@ export function ExerciseCard({
           <View style={styles.headerMeta}>
             <MuscleGroupBadge name={exercise.muscleGroupName} />
             <Text style={styles.setsCount}>
-              {completedSets}/{exercise.sets.length} sets
+              {completedSets}/{exercise.sets.length} sets done
             </Text>
           </View>
         </View>
@@ -45,13 +45,11 @@ export function ExerciseCard({
         </TouchableOpacity>
       </View>
 
-      {/* Column headers */}
+      {/* Column labels */}
       <View style={styles.colHeaders}>
-        <Text style={[styles.colHeader, { width: 28 }]}>SET</Text>
+        <Text style={[styles.colHeader, { width: 36 }]}>SET</Text>
         <Text style={[styles.colHeader, { flex: 1 }]}>WEIGHT</Text>
-        <Text style={[styles.colHeader, { width: 16 }]} />
-        <Text style={[styles.colHeader, { flex: 1 }]}>REPS</Text>
-        <Text style={[styles.colHeader, { width: 64 }]} />
+        <Text style={[styles.colHeader, { width: 80 }]} />
       </View>
 
       {/* Set rows */}
@@ -61,15 +59,14 @@ export function ExerciseCard({
           set={set}
           weightUnit={weightUnit}
           onWeightChange={(val) => onUpdateSet(set.setNumber, { weight: val })}
-          onRepsChange={(val) => onUpdateSet(set.setNumber, { reps: val })}
-          onComplete={() => onCompleteSet(set)}
+          onStart={() => onStartSet(set)}
           onDelete={() => onDeleteSet(set.setNumber)}
         />
       ))}
 
-      {/* Add set button */}
+      {/* Add set */}
       <TouchableOpacity onPress={onAddSet} style={styles.addSetBtn} activeOpacity={0.7}>
-        <IconSymbol name="plus" size={16} color={GymColors.primary} />
+        <IconSymbol name="plus" size={15} color={GymColors.primary} />
         <Text style={styles.addSetText}>Add Set</Text>
       </TouchableOpacity>
     </View>
@@ -115,16 +112,15 @@ const styles = StyleSheet.create({
   colHeaders: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: Spacing.sm,
+    paddingHorizontal: Spacing.xs,
     marginBottom: Spacing.xs,
-    gap: Spacing.xs,
+    gap: Spacing.sm,
   },
   colHeader: {
     color: GymColors.textMuted,
     fontSize: 10,
     fontWeight: '700',
     letterSpacing: 0.8,
-    textAlign: 'center',
   },
   addSetBtn: {
     flexDirection: 'row',

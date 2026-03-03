@@ -17,10 +17,17 @@ import { Button } from '@/components/ui/button';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { ExerciseCard } from '@/components/workout/exercise-card';
 import { AddExerciseSheet } from '@/components/workout/add-exercise-sheet';
+import { RepCounterModal } from '@/components/workout/rep-counter-modal';
 import { useWorkout } from '@/hooks/use-workout';
 import { useExercises } from '@/hooks/use-exercises';
 import { Exercise } from '@/types/exercise';
 import { ActiveSet } from '@/types/workout';
+
+interface ActiveSetContext {
+  exerciseId: number;
+  workoutExerciseId: number | null;
+  set: ActiveSet;
+}
 
 export default function ActiveWorkoutScreen() {
   const insets = useSafeAreaInsets();
@@ -30,8 +37,9 @@ export default function ActiveWorkoutScreen() {
   const { exercises, muscleGroups } = useExercises();
   const sheetRef = useRef<BottomSheet>(null);
   const [finishing, setFinishing] = useState(false);
+  const [activeSetCtx, setActiveSetCtx] = useState<ActiveSetContext | null>(null);
 
-  // Timer display
+  // Elapsed timer
   const [elapsed, setElapsed] = useState(0);
   useEffect(() => {
     if (!activeWorkout) return;
@@ -55,16 +63,40 @@ export default function ActiveWorkoutScreen() {
     });
   };
 
-  const handleCompleteSet = async (exerciseId: number, workoutExerciseId: number | null, set: ActiveSet) => {
-    if (!workoutExerciseId) return;
-    const result = await completeSet(exerciseId, workoutExerciseId, set);
-    if (result?.isPR) {
-      Toast.show({
-        type: 'success',
-        text1: '🏆 New PR!',
-        text2: `${set.weight}${weightUnit} × ${set.reps} reps`,
-        visibilityTime: 3000,
-      });
+  // Called when user taps "Start" on a set row
+  const handleStartSet = (exerciseId: number, workoutExerciseId: number | null, set: ActiveSet) => {
+    const weight = set.weight.trim();
+    if (!weight || parseFloat(weight) === 0) {
+      Alert.alert('Set a weight first', 'Enter the weight before starting the set.');
+      return;
+    }
+    setActiveSetCtx({ exerciseId, workoutExerciseId, set });
+  };
+
+  // Called when rep counter modal saves
+  const handleRepCountSave = async (reps: number, method: 'auto' | 'voice' | 'manual') => {
+    if (!activeSetCtx) return;
+    const { exerciseId, workoutExerciseId, set } = activeSetCtx;
+    setActiveSetCtx(null);
+
+    // Update set with final reps, then complete it
+    updateSet(exerciseId, set.setNumber, {
+      reps: String(reps),
+      repCountMethod: method,
+    });
+
+    const updatedSet: ActiveSet = { ...set, reps: String(reps), repCountMethod: method };
+
+    if (workoutExerciseId) {
+      const result = await completeSet(exerciseId, workoutExerciseId, updatedSet);
+      if (result?.isPR) {
+        Toast.show({
+          type: 'success',
+          text1: '🏆 New PR!',
+          text2: `${set.weight} ${weightUnit} × ${reps} reps`,
+          visibilityTime: 3000,
+        });
+      }
     }
   };
 
@@ -73,7 +105,7 @@ export default function ActiveWorkoutScreen() {
       Alert.alert('No exercises logged', 'Add at least one exercise before finishing.');
       return;
     }
-    Alert.alert('Finish Workout?', 'This will end your workout and save all sets.', [
+    Alert.alert('Finish Workout?', 'This will end your workout and save all completed sets.', [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Finish',
@@ -104,16 +136,10 @@ export default function ActiveWorkoutScreen() {
           <Text style={styles.workoutName}>{activeWorkout.name}</Text>
           <Text style={styles.timer}>{formatElapsed(elapsed)}</Text>
         </View>
-        <Button
-          title="Finish"
-          onPress={handleFinish}
-          loading={finishing}
-          variant="primary"
-          size="sm"
-        />
+        <Button title="Finish" onPress={handleFinish} loading={finishing} variant="primary" size="sm" />
       </View>
 
-      {/* Exercises scroll */}
+      {/* Exercise list */}
       <ScrollView
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
@@ -123,7 +149,7 @@ export default function ActiveWorkoutScreen() {
           <View style={styles.emptyExercises}>
             <IconSymbol name="dumbbell.fill" size={40} color={GymColors.textMuted} />
             <Text style={styles.emptyTitle}>Add your first exercise</Text>
-            <Text style={styles.emptyText}>Tap the button below to add exercises to your workout.</Text>
+            <Text style={styles.emptyText}>Tap the button below to get started.</Text>
           </View>
         )}
 
@@ -133,17 +159,13 @@ export default function ActiveWorkoutScreen() {
             exercise={exercise}
             weightUnit={weightUnit}
             onUpdateSet={(setNum, data) => updateSet(exercise.exerciseId, setNum, data)}
-            onCompleteSet={(set) => handleCompleteSet(exercise.exerciseId, exercise.workoutExerciseId, set)}
+            onStartSet={(set) => handleStartSet(exercise.exerciseId, exercise.workoutExerciseId, set)}
             onDeleteSet={(setNum) => removeSet(exercise.exerciseId, setNum)}
             onAddSet={() => addSet(exercise.exerciseId)}
             onRemove={() => {
-              Alert.alert('Remove Exercise?', `Remove ${exercise.exerciseName} from this workout?`, [
+              Alert.alert('Remove Exercise?', `Remove ${exercise.exerciseName}?`, [
                 { text: 'Cancel', style: 'cancel' },
-                {
-                  text: 'Remove',
-                  style: 'destructive',
-                  onPress: () => useWorkout().activeWorkout && null, // handled via store
-                },
+                { text: 'Remove', style: 'destructive', onPress: () => {} },
               ]);
             }}
           />
@@ -159,7 +181,7 @@ export default function ActiveWorkoutScreen() {
           onPress={() => sheetRef.current?.expand()}
           activeOpacity={0.85}
         >
-          <IconSymbol name="plus" size={24} color={GymColors.textPrimary} />
+          <IconSymbol name="plus" size={22} color={GymColors.textPrimary} />
           <Text style={styles.addBtnText}>Add Exercise</Text>
         </TouchableOpacity>
       </View>
@@ -171,6 +193,21 @@ export default function ActiveWorkoutScreen() {
         onSelect={handleAddExercise}
         sheetRef={sheetRef}
       />
+
+      {/* Rep counter modal */}
+      {activeSetCtx && (
+        <RepCounterModal
+          visible={!!activeSetCtx}
+          exerciseName={
+            activeWorkout.exercises.find((e) => e.exerciseId === activeSetCtx.exerciseId)?.exerciseName ?? ''
+          }
+          setNumber={activeSetCtx.set.setNumber}
+          weight={activeSetCtx.set.weight}
+          weightUnit={weightUnit}
+          onSave={handleRepCountSave}
+          onCancel={() => setActiveSetCtx(null)}
+        />
+      )}
     </View>
   );
 }

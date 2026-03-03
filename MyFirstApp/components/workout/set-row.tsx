@@ -1,13 +1,13 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Animated,
 } from 'react-native';
-import { GymColors, FontSize, Spacing, BorderRadius } from '@/constants/theme';
+import { LinearGradient } from 'expo-linear-gradient';
+import { GymColors, GymGradients, FontSize, Spacing, BorderRadius } from '@/constants/theme';
 import { ActiveSet } from '@/types/workout';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 
@@ -15,46 +15,25 @@ interface SetRowProps {
   set: ActiveSet;
   weightUnit: string;
   onWeightChange: (val: string) => void;
-  onRepsChange: (val: string) => void;
-  onComplete: () => void;
+  onStart: () => void;
   onDelete: () => void;
 }
 
-export function SetRow({
-  set,
-  weightUnit,
-  onWeightChange,
-  onRepsChange,
-  onComplete,
-  onDelete,
-}: SetRowProps) {
-  const scaleAnim = useRef(new Animated.Value(1)).current;
-
-  const handleComplete = () => {
-    Animated.sequence([
-      Animated.timing(scaleAnim, { toValue: 0.95, duration: 80, useNativeDriver: true }),
-      Animated.timing(scaleAnim, { toValue: 1, duration: 80, useNativeDriver: true }),
-    ]).start();
-    onComplete();
-  };
-
-  const rowStyle = set.isDone
-    ? [styles.row, styles.rowDone]
-    : set.isPR
-    ? [styles.row, styles.rowPR]
-    : styles.row;
-
+export function SetRow({ set, weightUnit, onWeightChange, onStart, onDelete }: SetRowProps) {
   return (
-    <Animated.View style={[rowStyle, { transform: [{ scale: scaleAnim }] }]}>
+    <View style={[styles.row, set.isDone && styles.rowDone]}>
       {/* Set number */}
-      <View style={styles.setNum}>
-        <Text style={styles.setNumText}>{set.setNumber}</Text>
+      <View style={[styles.setNum, set.isDone && styles.setNumDone]}>
+        {set.isDone
+          ? <IconSymbol name="checkmark" size={14} color={GymColors.success} />
+          : <Text style={styles.setNumText}>{set.setNumber}</Text>
+        }
       </View>
 
       {/* Weight input */}
-      <View style={styles.inputWrap}>
+      <View style={styles.weightWrap}>
         <TextInput
-          style={[styles.input, set.isDone && styles.inputDone]}
+          style={[styles.weightInput, set.isDone && styles.inputDone]}
           value={set.weight}
           onChangeText={onWeightChange}
           keyboardType="decimal-pad"
@@ -66,51 +45,38 @@ export function SetRow({
         <Text style={styles.unit}>{weightUnit}</Text>
       </View>
 
-      <Text style={styles.cross}>×</Text>
-
-      {/* Reps input */}
-      <View style={styles.inputWrap}>
-        <TextInput
-          style={[styles.input, set.isDone && styles.inputDone]}
-          value={set.reps}
-          onChangeText={onRepsChange}
-          keyboardType="number-pad"
-          editable={!set.isDone}
-          selectTextOnFocus
-          placeholder="0"
-          placeholderTextColor={GymColors.textMuted}
-        />
-        <Text style={styles.unit}>reps</Text>
-      </View>
-
-      {/* PR badge */}
-      {set.isPR && (
-        <View style={styles.prBadge}>
-          <Text style={styles.prText}>PR!</Text>
+      {/* Done: show reps logged */}
+      {set.isDone ? (
+        <View style={styles.doneInfo}>
+          <Text style={styles.doneReps}>{set.reps} reps</Text>
+          {set.isPR && (
+            <View style={styles.prBadge}>
+              <Text style={styles.prText}>PR!</Text>
+            </View>
+          )}
         </View>
-      )}
-
-      {/* Checkmark / done button */}
-      <TouchableOpacity
-        onPress={set.isDone ? undefined : handleComplete}
-        style={[styles.checkBtn, set.isDone && styles.checkBtnDone]}
-        activeOpacity={0.7}
-        disabled={set.isDone}
-      >
-        <IconSymbol
-          name="checkmark"
-          size={16}
-          color={set.isDone ? GymColors.success : GymColors.textMuted}
-        />
-      </TouchableOpacity>
-
-      {/* Delete */}
-      {!set.isDone && (
-        <TouchableOpacity onPress={onDelete} style={styles.deleteBtn} activeOpacity={0.7}>
-          <IconSymbol name="xmark" size={14} color={GymColors.danger} />
+      ) : (
+        /* Start button */
+        <TouchableOpacity onPress={onStart} activeOpacity={0.85} style={styles.startWrapper}>
+          <LinearGradient
+            colors={GymGradients.primary}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.startBtn}
+          >
+            <IconSymbol name="play.fill" size={13} color={GymColors.textPrimary} />
+            <Text style={styles.startText}>Start</Text>
+          </LinearGradient>
         </TouchableOpacity>
       )}
-    </Animated.View>
+
+      {/* Delete (only if not done) */}
+      {!set.isDone && (
+        <TouchableOpacity onPress={onDelete} style={styles.deleteBtn} activeOpacity={0.7}>
+          <IconSymbol name="xmark" size={13} color={GymColors.danger} />
+        </TouchableOpacity>
+      )}
+    </View>
   );
 }
 
@@ -122,18 +88,14 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
     marginBottom: Spacing.xs,
     paddingHorizontal: Spacing.sm,
-    paddingVertical: Spacing.xs,
+    paddingVertical: Spacing.sm,
     borderWidth: 1,
     borderColor: GymColors.border,
-    gap: Spacing.xs,
+    gap: Spacing.sm,
   },
   rowDone: {
-    borderColor: GymColors.success + '60',
-    backgroundColor: GymColors.success + '10',
-  },
-  rowPR: {
-    borderColor: GymColors.accent + '80',
-    backgroundColor: GymColors.accent + '10',
+    borderColor: GymColors.success + '50',
+    backgroundColor: GymColors.success + '08',
   },
   setNum: {
     width: 28,
@@ -143,64 +105,55 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  setNumDone: {
+    backgroundColor: GymColors.success + '20',
+  },
   setNumText: {
     color: GymColors.textMuted,
     fontSize: FontSize.xs,
     fontWeight: '700',
   },
-  inputWrap: {
+  weightWrap: {
     flex: 1,
-    alignItems: 'center',
     flexDirection: 'row',
-    gap: 4,
+    alignItems: 'center',
+    gap: 6,
   },
-  input: {
+  weightInput: {
     flex: 1,
     backgroundColor: GymColors.elevated,
     borderRadius: BorderRadius.sm,
     paddingHorizontal: Spacing.sm,
-    paddingVertical: Spacing.xs,
+    paddingVertical: Spacing.xs + 2,
     color: GymColors.textPrimary,
     fontSize: FontSize.md,
     fontWeight: '600',
     textAlign: 'center',
     borderWidth: 1,
     borderColor: GymColors.border,
-    minWidth: 56,
+    minWidth: 60,
   },
   inputDone: {
-    opacity: 0.6,
+    opacity: 0.5,
     borderColor: 'transparent',
   },
   unit: {
     color: GymColors.textMuted,
     fontSize: FontSize.xs,
     fontWeight: '500',
+    minWidth: 24,
   },
-  cross: {
-    color: GymColors.textMuted,
+  doneInfo: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: Spacing.xs,
+  },
+  doneReps: {
+    color: GymColors.success,
     fontSize: FontSize.md,
-    fontWeight: '300',
-  },
-  checkBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: BorderRadius.full,
-    backgroundColor: GymColors.elevated,
-    borderWidth: 1.5,
-    borderColor: GymColors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkBtnDone: {
-    backgroundColor: GymColors.success + '20',
-    borderColor: GymColors.success,
-  },
-  deleteBtn: {
-    width: 28,
-    height: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
+    fontWeight: '700',
   },
   prBadge: {
     backgroundColor: GymColors.accent + '25',
@@ -212,5 +165,28 @@ const styles = StyleSheet.create({
     color: GymColors.accent,
     fontSize: FontSize.xs,
     fontWeight: '800',
+  },
+  startWrapper: {
+    borderRadius: BorderRadius.sm,
+    overflow: 'hidden',
+  },
+  startBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs + 2,
+    borderRadius: BorderRadius.sm,
+  },
+  startText: {
+    color: GymColors.textPrimary,
+    fontSize: FontSize.sm,
+    fontWeight: '700',
+  },
+  deleteBtn: {
+    width: 28,
+    height: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

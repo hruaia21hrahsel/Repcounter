@@ -1,4 +1,4 @@
-export type RepCountMethod = 'manual' | 'voice' | 'camera';
+export type RepCountMethod = 'manual' | 'voice' | 'camera' | 'auto';
 
 export interface WorkoutSet {
   id: number;

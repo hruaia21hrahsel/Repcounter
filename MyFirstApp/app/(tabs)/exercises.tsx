@@ -13,7 +13,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { GymColors, FontSize, Spacing, BorderRadius } from '@/constants/theme';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { MuscleGroupBadge, EquipmentBadge } from '@/components/ui/badge';
 import { useExercises } from '@/hooks/use-exercises';
 
 export default function ExercisesScreen() {
@@ -95,18 +94,7 @@ export default function ExercisesScreen() {
               onPress={() => router.push(`/exercise/${item.id}`)}
               activeOpacity={0.7}
             >
-              <View style={styles.exerciseInfo}>
-                <Text style={styles.exerciseName}>{item.name}</Text>
-                <View style={styles.badges}>
-                  <MuscleGroupBadge name={item.muscleGroupName ?? ''} />
-                  <EquipmentBadge name={item.equipment} />
-                  {item.mechanic === 'compound' && (
-                    <View style={styles.compoundBadge}>
-                      <Text style={styles.compoundText}>compound</Text>
-                    </View>
-                  )}
-                </View>
-              </View>
+              <Text style={styles.exerciseName}>{item.name}</Text>
               <IconSymbol name="chevron.right" size={16} color={GymColors.textMuted} />
             </TouchableOpacity>
           )}

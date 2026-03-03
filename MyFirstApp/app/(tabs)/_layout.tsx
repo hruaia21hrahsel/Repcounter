@@ -36,10 +36,7 @@ export default function TabLayout() {
       />
       <Tabs.Screen
         name="exercises"
-        options={{
-          title: 'Exercises',
-          tabBarIcon: ({ color }) => <IconSymbol size={24} name="dumbbell.fill" color={color} />,
-        }}
+        options={{ href: null }}
       />
       <Tabs.Screen
         name="history"
@@ -50,10 +47,7 @@ export default function TabLayout() {
       />
       <Tabs.Screen
         name="counter"
-        options={{
-          title: 'Counter',
-          tabBarIcon: ({ color }) => <IconSymbol size={24} name="mic.fill" color={color} />,
-        }}
+        options={{ href: null }}
       />
       <Tabs.Screen
         name="profile"

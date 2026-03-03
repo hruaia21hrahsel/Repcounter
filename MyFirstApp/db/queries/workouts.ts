@@ -2,11 +2,11 @@ import { eq, desc, isNull, isNotNull } from 'drizzle-orm';
 import { getDb } from '../index';
 import { workouts, workoutExercises, exercises, sets, muscleGroups } from '../schema';
 
-export async function createWorkout(name: string) {
+export async function createWorkout(name: string, startedAt?: number) {
   const db = getDb();
   const result = await db
     .insert(workouts)
-    .values({ name, startedAt: Date.now() })
+    .values({ name, startedAt: startedAt ?? Date.now() })
     .returning({ id: workouts.id });
   return result[0].id;
 }

@@ -5,7 +5,7 @@ interface WorkoutStore {
   activeWorkout: ActiveWorkout | null;
   restTimerEndAt: number | null;
 
-  startWorkout: (name: string, workoutId: number) => void;
+  startWorkout: (name: string, workoutId: number, startedAt?: number) => void;
   endWorkout: () => void;
   addExercise: (exercise: Omit<ActiveExercise, 'sets'>, workoutExerciseId: number) => void;
   removeExercise: (exerciseId: number) => void;
@@ -32,12 +32,12 @@ export const useWorkoutStore = create<WorkoutStore>((set, get) => ({
   activeWorkout: null,
   restTimerEndAt: null,
 
-  startWorkout: (name, workoutId) =>
+  startWorkout: (name, workoutId, startedAt) =>
     set({
       activeWorkout: {
         workoutId,
         name,
-        startedAt: Date.now(),
+        startedAt: startedAt ?? Date.now(),
         exercises: [],
       },
     }),

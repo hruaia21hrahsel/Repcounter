@@ -14,9 +14,9 @@ export function useWorkout() {
   const store = useWorkoutStore();
   const { defaultRestSecs, weightUnit, setActiveWorkoutId } = useSettingsStore();
 
-  const startNewWorkout = useCallback(async (name: string) => {
-    const workoutId = await createWorkout(name);
-    store.startWorkout(name, workoutId);
+  const startNewWorkout = useCallback(async (name: string, startedAt?: number) => {
+    const workoutId = await createWorkout(name, startedAt);
+    store.startWorkout(name, workoutId, startedAt);
     setActiveWorkoutId(workoutId);
     return workoutId;
   }, []);

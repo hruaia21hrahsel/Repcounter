@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { format } from 'date-fns';
 import { getRecentWorkouts } from '@/db/queries/workouts';
 
 export function useHistory() {
@@ -24,7 +25,7 @@ export function useHistory() {
   // Build calendar marks map: { '2026-03-01': { marked: true } }
   const markedDates: Record<string, { marked: boolean; dotColor: string }> = {};
   for (const w of workouts) {
-    const date = new Date(w.startedAt).toISOString().slice(0, 10);
+    const date = format(new Date(w.startedAt), 'yyyy-MM-dd');
     markedDates[date] = { marked: true, dotColor: '#FF4D00' };
   }
 

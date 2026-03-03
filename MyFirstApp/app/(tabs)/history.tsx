@@ -24,7 +24,7 @@ export default function HistoryScreen() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   const filteredWorkouts = selectedDate
-    ? workouts.filter((w) => new Date(w.startedAt).toISOString().slice(0, 10) === selectedDate)
+    ? workouts.filter((w) => format(new Date(w.startedAt), 'yyyy-MM-dd') === selectedDate)
     : workouts;
 
   const formatDuration = (secs: number | null) => {

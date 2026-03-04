@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   victoryTitle: {
-    color: GymColors.textPrimary,
+    color: '#FFFFFF',
     fontSize: FontSize.xxl,
     fontWeight: '900',
   },

@@ -107,7 +107,7 @@ export default function DashboardScreen() {
                 <Text style={styles.activeBannerLabel}>ACTIVE WORKOUT</Text>
                 <Text style={styles.activeBannerName}>{activeWorkout.name}</Text>
               </View>
-              <IconSymbol name="chevron.right" size={20} color={GymColors.textPrimary} />
+              <IconSymbol name="chevron.right" size={20} color="#FFF" />
             </LinearGradient>
           </TouchableOpacity>
         )}
@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   activeBannerName: {
-    color: GymColors.textPrimary,
+    color: '#FFFFFF',
     fontSize: FontSize.lg,
     fontWeight: '700',
   },

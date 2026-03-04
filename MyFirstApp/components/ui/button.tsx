@@ -123,6 +123,7 @@ const variantTextStyles: Record<Exclude<Variant, 'primary'>, TextStyle> = {
   ghost: { color: GymColors.primary },
   danger: { color: GymColors.danger },
 };
+// Note: primary variant text is always #FFF (on orange gradient bg)
 
 const styles = StyleSheet.create({
   wrapper: {
@@ -137,7 +138,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   text: {
-    color: GymColors.textPrimary,
+    color: '#FFFFFF',
     fontWeight: '700',
     letterSpacing: 0.3,
   },

@@ -16,7 +16,7 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={styles.root}>
       <SQLiteProvider databaseName="reptracker.db" onInit={migrateDb}>
-        <Stack screenOptions={{ contentStyle: { backgroundColor: '#0A0A0F' } }}>
+        <Stack screenOptions={{ contentStyle: { backgroundColor: '#F4F6FB' } }}>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen
             name="workout/new"
@@ -43,7 +43,7 @@ export default function RootLayout() {
             options={{ headerShown: false, presentation: 'modal' }}
           />
         </Stack>
-        <StatusBar style="light" />
+        <StatusBar style="dark" />
         <Toast />
       </SQLiteProvider>
     </GestureHandlerRootView>

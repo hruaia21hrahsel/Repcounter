@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { GymColors, BorderRadius, FontSize, Spacing } from '@/constants/theme';
 
 interface BadgeProps {
@@ -45,6 +46,37 @@ export function MuscleGroupBadge({ name, style }: { name: string; style?: ViewSt
 
 export function EquipmentBadge({ name, style }: { name: string; style?: ViewStyle }) {
   return <Badge label={name} color={GymColors.textMuted} textColor={GymColors.textMuted} style={style} />;
+}
+
+const MUSCLE_META: Record<string, { color: string; matIcon: string }> = {
+  Chest:     { color: '#EF4444', matIcon: 'fitness-center' },
+  Back:      { color: '#3B82F6', matIcon: 'accessibility' },
+  Shoulders: { color: '#10B981', matIcon: 'fitness-center' },
+  Biceps:    { color: '#F59E0B', matIcon: 'fitness-center' },
+  Triceps:   { color: '#8B5CF6', matIcon: 'fitness-center' },
+  Legs:      { color: '#EC4899', matIcon: 'directions-run' },
+  Core:      { color: '#FF6B35', matIcon: 'local-fire-department' },
+  Glutes:    { color: '#06B6D4', matIcon: 'directions-walk' },
+  Calves:    { color: '#14B8A6', matIcon: 'directions-walk' },
+  Forearms:  { color: '#84CC16', matIcon: 'fitness-center' },
+};
+
+export function MuscleGroupIcon({ name, size = 36 }: { name: string; size?: number }) {
+  const meta = MUSCLE_META[name] ?? { color: GymColors.primary, matIcon: 'fitness-center' };
+  return (
+    <View
+      style={{
+        width: size,
+        height: size,
+        borderRadius: size * 0.3,
+        backgroundColor: meta.color,
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <MaterialIcons name={meta.matIcon as any} size={size * 0.52} color="#FFF" />
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({

@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { GymColors, FontSize, Spacing, BorderRadius } from '@/constants/theme';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { MuscleGroupIcon } from '@/components/ui/badge';
 import { useExercises } from '@/hooks/use-exercises';
 
 export default function ExercisesScreen() {
@@ -94,6 +95,7 @@ export default function ExercisesScreen() {
               onPress={() => router.push(`/exercise/${item.id}`)}
               activeOpacity={0.7}
             >
+              <MuscleGroupIcon name={item.muscleGroupName ?? ''} size={36} />
               <Text style={styles.exerciseName}>{item.name}</Text>
               <IconSymbol name="chevron.right" size={16} color={GymColors.textMuted} />
             </TouchableOpacity>
@@ -179,7 +181,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   pillTextActive: {
-    color: GymColors.textPrimary,
+    color: '#FFFFFF',
   },
   loading: {
     marginTop: Spacing.xxl,
@@ -191,8 +193,8 @@ const styles = StyleSheet.create({
   exerciseItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: Spacing.md,
+    gap: Spacing.md,
+    paddingVertical: Spacing.sm + 2,
   },
   exerciseInfo: {
     flex: 1,
@@ -202,6 +204,7 @@ const styles = StyleSheet.create({
     color: GymColors.textPrimary,
     fontSize: FontSize.md,
     fontWeight: '600',
+    flex: 1,
   },
   badges: {
     flexDirection: 'row',

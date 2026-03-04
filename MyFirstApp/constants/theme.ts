@@ -1,17 +1,17 @@
 import { Platform } from 'react-native';
 
 export const GymColors = {
-  background: '#0A0A0F',
-  card: '#13131A',
-  elevated: '#1C1C26',
+  background: '#F4F6FB',
+  card: '#FFFFFF',
+  elevated: '#EEF1F8',
   primary: '#FF4D00',
   accent: '#FF8C00',
-  success: '#00D68F',
-  danger: '#FF3B3B',
-  textPrimary: '#FFFFFF',
-  textMuted: '#A0A0B0',
-  border: '#2A2A38',
-  tabBar: '#0D0D14',
+  success: '#00C47A',
+  danger: '#FF3B30',
+  textPrimary: '#111827',
+  textMuted: '#9CA3AF',
+  border: '#E8ECF4',
+  tabBar: '#FFFFFF',
 };
 
 export const GymGradients = {

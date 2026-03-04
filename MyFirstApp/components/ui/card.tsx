@@ -28,11 +28,17 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: GymColors.card,
     borderRadius: BorderRadius.lg,
-    borderWidth: 1,
-    borderColor: GymColors.border,
+    shadowColor: '#94A3C0',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.14,
+    shadowRadius: 8,
+    elevation: 2,
   },
   elevated: {
-    backgroundColor: GymColors.elevated,
+    shadowColor: '#6080A8',
+    shadowOpacity: 0.20,
+    shadowRadius: 12,
+    elevation: 4,
   },
   padding: {
     padding: Spacing.md,

@@ -10,7 +10,6 @@ import {
 import BottomSheet, { BottomSheetView, BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import { GymColors, FontSize, Spacing, BorderRadius } from '@/constants/theme';
 import { Exercise, MuscleGroup } from '@/types/exercise';
-import { MuscleGroupBadge } from '@/components/ui/badge';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 
 interface AddExerciseSheetProps {
@@ -104,13 +103,7 @@ export function AddExerciseSheet({ exercises, muscleGroups, onSelect, sheetRef }
             onPress={() => handleSelect(item)}
             activeOpacity={0.7}
           >
-            <View style={styles.exerciseInfo}>
-              <Text style={styles.exerciseName}>{item.name}</Text>
-              <View style={styles.exerciseMeta}>
-                <MuscleGroupBadge name={item.muscleGroupName ?? ''} />
-                <Text style={styles.equipment}>{item.equipment}</Text>
-              </View>
-            </View>
+            <Text style={styles.exerciseName}>{item.name}</Text>
             <IconSymbol name="plus.circle.fill" size={24} color={GymColors.primary} />
           </TouchableOpacity>
         )}
@@ -188,24 +181,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: Spacing.md,
   },
-  exerciseInfo: {
-    flex: 1,
-    gap: Spacing.xs,
-  },
   exerciseName: {
     color: GymColors.textPrimary,
     fontSize: FontSize.md,
     fontWeight: '600',
-  },
-  exerciseMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xs,
-  },
-  equipment: {
-    color: GymColors.textMuted,
-    fontSize: FontSize.xs,
-    textTransform: 'capitalize',
+    flex: 1,
   },
   separator: {
     height: 1,

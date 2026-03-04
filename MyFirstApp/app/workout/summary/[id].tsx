@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -16,7 +17,7 @@ import { GymColors, GymGradients, FontSize, Spacing, BorderRadius } from '@/cons
 import { Card } from '@/components/ui/card';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { MuscleGroupBadge } from '@/components/ui/badge';
-import { getWorkoutById, getWorkoutExercises, getWorkoutSets } from '@/db/queries/workouts';
+import { getWorkoutById, getWorkoutExercises, getWorkoutSets, deleteWorkoutCascade } from '@/db/queries/workouts';
 import { useSettingsStore } from '@/stores/settings-store';
 
 interface SummaryExercise {
@@ -72,6 +73,24 @@ export default function WorkoutSummaryScreen() {
       </View>
     );
   }
+
+  const handleDelete = () => {
+    Alert.alert(
+      'Delete Workout',
+      'This will permanently delete this workout and all its sets.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            await deleteWorkoutCascade(parseInt(id ?? '0'));
+            router.replace('/history');
+          },
+        },
+      ],
+    );
+  };
 
   const formatDuration = (secs: number | null) => {
     if (!secs) return '--';
@@ -153,13 +172,27 @@ export default function WorkoutSummaryScreen() {
           </Card>
         ))}
 
-        {/* Done button */}
-        <TouchableOpacity
-          style={styles.doneBtn}
-          onPress={() => router.replace('/')}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.doneBtnText}>Back to Home</Text>
+        {/* Action buttons */}
+        <View style={styles.actionRow}>
+          <TouchableOpacity
+            style={[styles.actionBtn, styles.editBtn]}
+            onPress={() => router.push({ pathname: '/workout/edit/[id]', params: { id: id ?? '' } })}
+            activeOpacity={0.8}
+          >
+            <IconSymbol name="pencil" size={16} color={GymColors.textPrimary} />
+            <Text style={styles.editBtnText}>Edit</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.actionBtn, styles.doneBtn]}
+            onPress={() => router.replace('/')}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.doneBtnText}>Back to Home</Text>
+          </TouchableOpacity>
+        </View>
+        <TouchableOpacity style={styles.deleteBtn} onPress={handleDelete} activeOpacity={0.8}>
+          <IconSymbol name="trash" size={16} color={GymColors.danger} />
+          <Text style={styles.deleteBtnText}>Delete Workout</Text>
         </TouchableOpacity>
       </ScrollView>
     </View>
@@ -289,17 +322,53 @@ const styles = StyleSheet.create({
     fontSize: FontSize.xs,
     fontWeight: '800',
   },
-  doneBtn: {
-    backgroundColor: GymColors.elevated,
+  actionRow: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+    marginTop: Spacing.sm,
+  },
+  actionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     borderRadius: BorderRadius.lg,
     padding: Spacing.md,
-    alignItems: 'center',
+    gap: Spacing.xs,
+  },
+  editBtn: {
+    backgroundColor: GymColors.elevated,
     borderWidth: 1,
     borderColor: GymColors.border,
-    marginTop: Spacing.sm,
+    width: 90,
+  },
+  editBtnText: {
+    color: GymColors.textPrimary,
+    fontSize: FontSize.md,
+    fontWeight: '700',
+  },
+  doneBtn: {
+    flex: 1,
+    backgroundColor: GymColors.elevated,
+    borderWidth: 1,
+    borderColor: GymColors.border,
   },
   doneBtnText: {
     color: GymColors.textPrimary,
+    fontSize: FontSize.md,
+    fontWeight: '700',
+  },
+  deleteBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.sm,
+    borderWidth: 1,
+    borderColor: GymColors.danger + '60',
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.md,
+  },
+  deleteBtnText: {
+    color: GymColors.danger,
     fontSize: FontSize.md,
     fontWeight: '700',
   },

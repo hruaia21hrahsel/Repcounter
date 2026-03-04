@@ -31,6 +31,10 @@ export default function RootLayout() {
             options={{ headerShown: false }}
           />
           <Stack.Screen
+            name="workout/edit/[id]"
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
             name="exercise/[id]"
             options={{ headerShown: false }}
           />

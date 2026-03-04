@@ -1,6 +1,6 @@
-import { eq, desc, isNull, isNotNull } from 'drizzle-orm';
+import { eq, desc, isNull, isNotNull, inArray } from 'drizzle-orm';
 import { getDb } from '../index';
-import { workouts, workoutExercises, exercises, sets, muscleGroups } from '../schema';
+import { workouts, workoutExercises, exercises, sets, muscleGroups, personalRecords } from '../schema';
 
 export async function createWorkout(name: string, startedAt?: number) {
   const db = getDb();
@@ -89,4 +89,38 @@ export async function getWorkoutSets(workoutExerciseId: number) {
 export async function deleteWorkout(id: number) {
   const db = getDb();
   return db.delete(workouts).where(eq(workouts.id, id));
+}
+
+export async function updateWorkout(id: number, data: { name?: string; startedAt?: number }) {
+  const db = getDb();
+  return db.update(workouts).set(data).where(eq(workouts.id, id));
+}
+
+export async function deleteWorkoutCascade(id: number) {
+  const db = getDb();
+
+  const wes = await db
+    .select({ id: workoutExercises.id })
+    .from(workoutExercises)
+    .where(eq(workoutExercises.workoutId, id));
+
+  const weIds = wes.map((we) => we.id);
+
+  if (weIds.length > 0) {
+    const setRows = await db
+      .select({ id: sets.id })
+      .from(sets)
+      .where(inArray(sets.workoutExerciseId, weIds));
+
+    const setIds = setRows.map((s) => s.id);
+
+    if (setIds.length > 0) {
+      await db.delete(personalRecords).where(inArray(personalRecords.setId, setIds));
+      await db.delete(sets).where(inArray(sets.workoutExerciseId, weIds));
+    }
+
+    await db.delete(workoutExercises).where(eq(workoutExercises.workoutId, id));
+  }
+
+  await db.delete(workouts).where(eq(workouts.id, id));
 }

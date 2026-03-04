@@ -4,6 +4,7 @@ import {
   Text,
   TextInput,
   FlatList,
+  ScrollView,
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
@@ -22,66 +23,66 @@ export default function ExercisesScreen() {
     useExercises();
 
   return (
-    <View style={[styles.root, { paddingTop: insets.top }]}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.title}>Exercise Library</Text>
-        <TouchableOpacity
-          onPress={() => router.push('/exercise/create')}
-          style={styles.addBtn}
-          activeOpacity={0.7}
-        >
-          <IconSymbol name="plus" size={20} color={GymColors.primary} />
-        </TouchableOpacity>
-      </View>
-
-      {/* Search */}
-      <View style={styles.searchRow}>
-        <IconSymbol name="list.bullet" size={18} color={GymColors.textMuted} />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search exercises..."
-          placeholderTextColor={GymColors.textMuted}
-          value={search}
-          onChangeText={setSearch}
-          autoCorrect={false}
-        />
-        {search.length > 0 && (
-          <TouchableOpacity onPress={() => setSearch('')}>
-            <IconSymbol name="xmark" size={16} color={GymColors.textMuted} />
-          </TouchableOpacity>
-        )}
-      </View>
-
-      {/* Muscle group filter */}
-      <FlatList
-        data={[{ id: null, name: 'All', icon: '' } as any, ...muscleGroups]}
-        keyExtractor={(item) => String(item.id)}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.pillsContainer}
-        renderItem={({ item }) => (
+    <View style={styles.root}>
+      {/* ── Fixed header ── */}
+      <View style={[styles.fixedTop, { paddingTop: insets.top }]}>
+        {/* Title row */}
+        <View style={styles.titleRow}>
+          <Text style={styles.title}>Exercises</Text>
           <TouchableOpacity
-            style={[
-              styles.pill,
-              (item.id === null ? selectedMuscleGroup === null : selectedMuscleGroup === item.id) && styles.pillActive,
-            ]}
-            onPress={() => setSelectedMuscleGroup(item.id ?? null)}
+            onPress={() => router.push('/exercise/create')}
+            style={styles.addBtn}
+            activeOpacity={0.7}
           >
-            <Text
-              style={[
-                styles.pillText,
-                (item.id === null ? selectedMuscleGroup === null : selectedMuscleGroup === item.id) &&
-                  styles.pillTextActive,
-              ]}
-            >
-              {item.name}
-            </Text>
+            <IconSymbol name="plus" size={20} color={GymColors.primary} />
           </TouchableOpacity>
-        )}
-      />
+        </View>
 
-      {/* Exercise list */}
+        {/* Search bar */}
+        <View style={styles.searchRow}>
+          <IconSymbol name="list.bullet" size={18} color={GymColors.textMuted} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search exercises..."
+            placeholderTextColor={GymColors.textMuted}
+            value={search}
+            onChangeText={setSearch}
+            autoCorrect={false}
+            returnKeyType="search"
+          />
+          {search.length > 0 && (
+            <TouchableOpacity onPress={() => setSearch('')} hitSlop={8}>
+              <IconSymbol name="xmark" size={16} color={GymColors.textMuted} />
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Muscle group filter pills — ScrollView avoids nested-FlatList touch conflicts */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.pillsContainer}
+          keyboardShouldPersistTaps="handled"
+        >
+          {[{ id: null, name: 'All' } as any, ...muscleGroups].map((item) => {
+            const active = item.id === null ? selectedMuscleGroup === null : selectedMuscleGroup === item.id;
+            return (
+              <TouchableOpacity
+                key={String(item.id)}
+                style={[styles.pill, active && styles.pillActive]}
+                onPress={() => setSelectedMuscleGroup(item.id ?? null)}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.pillText, active && styles.pillTextActive]}>
+                  {item.name}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      </View>
+
+      {/* ── Scrollable exercise list ── */}
       {loading ? (
         <ActivityIndicator color={GymColors.primary} style={styles.loading} />
       ) : (
@@ -89,13 +90,14 @@ export default function ExercisesScreen() {
           data={exercises}
           keyExtractor={(item) => String(item.id)}
           contentContainerStyle={styles.list}
+          keyboardShouldPersistTaps="handled"
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.exerciseItem}
               onPress={() => router.push(`/exercise/${item.id}`)}
               activeOpacity={0.7}
             >
-              <MuscleGroupIcon name={item.muscleGroupName ?? ''} size={36} />
+              <MuscleGroupIcon name={item.muscleGroupName ?? ''} size={38} />
               <Text style={styles.exerciseName}>{item.name}</Text>
               <IconSymbol name="chevron.right" size={16} color={GymColors.textMuted} />
             </TouchableOpacity>
@@ -117,13 +119,21 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: GymColors.background,
   },
-  header: {
+
+  /* ── Fixed top section ── */
+  fixedTop: {
+    backgroundColor: GymColors.background,
+    borderBottomWidth: 1,
+    borderBottomColor: GymColors.border,
+    paddingBottom: Spacing.sm,
+  },
+  titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.md,
     paddingTop: Spacing.sm,
-    paddingBottom: Spacing.sm,
+    paddingBottom: Spacing.md,
   },
   title: {
     color: GymColors.textPrimary,
@@ -131,12 +141,10 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   addBtn: {
-    width: 40,
-    height: 40,
+    width: 36,
+    height: 36,
     borderRadius: BorderRadius.full,
-    backgroundColor: GymColors.elevated,
-    borderWidth: 1,
-    borderColor: GymColors.border,
+    backgroundColor: GymColors.primary + '15',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -146,26 +154,34 @@ const styles = StyleSheet.create({
     backgroundColor: GymColors.card,
     borderRadius: BorderRadius.md,
     marginHorizontal: Spacing.md,
-    paddingHorizontal: Spacing.md,
-    gap: Spacing.sm,
-    borderWidth: 1,
-    borderColor: GymColors.border,
     marginBottom: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    gap: Spacing.sm,
+    borderWidth: 1.5,
+    borderColor: GymColors.border,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 1,
   },
   searchInput: {
     flex: 1,
     color: GymColors.textPrimary,
     fontSize: FontSize.md,
-    paddingVertical: Spacing.sm,
+    height: 36,
   },
+
+  /* ── Pills ── */
   pillsContainer: {
     gap: Spacing.xs,
     paddingHorizontal: Spacing.md,
-    paddingBottom: Spacing.sm,
+    paddingVertical: Spacing.xs,
   },
   pill: {
     paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
+    paddingVertical: 6,
     borderRadius: BorderRadius.full,
     backgroundColor: GymColors.card,
     borderWidth: 1,
@@ -183,11 +199,14 @@ const styles = StyleSheet.create({
   pillTextActive: {
     color: '#FFFFFF',
   },
+
+  /* ── List ── */
   loading: {
     marginTop: Spacing.xxl,
   },
   list: {
     paddingHorizontal: Spacing.md,
+    paddingTop: Spacing.sm,
     paddingBottom: Spacing.xxl,
   },
   exerciseItem: {
@@ -196,31 +215,11 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
     paddingVertical: Spacing.sm + 2,
   },
-  exerciseInfo: {
-    flex: 1,
-    gap: Spacing.xs,
-  },
   exerciseName: {
     color: GymColors.textPrimary,
     fontSize: FontSize.md,
     fontWeight: '600',
     flex: 1,
-  },
-  badges: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Spacing.xs,
-  },
-  compoundBadge: {
-    backgroundColor: GymColors.success + '20',
-    borderRadius: BorderRadius.full,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 2,
-  },
-  compoundText: {
-    color: GymColors.success,
-    fontSize: FontSize.xs,
-    fontWeight: '600',
   },
   separator: {
     height: 1,
